@@ -31,7 +31,8 @@ export class SlackService {
     cursor?: string
   ): Promise<ApiResponse> {
     try {
-      const result = await this.client.conversations.history({
+      const client = this.userClient || this.client;
+      const result = await client.conversations.history({
         channel,
         limit,
         cursor,
