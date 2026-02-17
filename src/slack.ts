@@ -72,8 +72,9 @@ export class SlackService {
   }
 
   async searchUsers(query: string): Promise<ApiResponse> {
+    const client = this.userClient || this.client;
     try {
-      const result = await this.client.users.list({});
+      const result = await client.users.list({});
       const users = (result.members || []).filter((u: any) =>
         u.real_name?.toLowerCase().includes(query.toLowerCase()) ||
         u.name?.toLowerCase().includes(query.toLowerCase())
