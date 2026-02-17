@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import { requireApiKey } from "./auth";
 import { SlackService } from "./slack";
 import type { SendMessageRequest, HistoryRequest, SearchRequest } from "./types";
+import { mountMcp } from "./mcp";
 
 dotenv.config();
 
@@ -74,6 +75,9 @@ export function createApp() {
     const result = await slack.openDm(userId);
     res.status(result.ok ? 200 : 500).json(result);
   });
+
+  // MCP protocol endpoint (no API key — MCP handles its own auth)
+  mountMcp(app, slack);
 
   return app;
 }
