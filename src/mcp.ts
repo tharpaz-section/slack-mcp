@@ -73,8 +73,22 @@ function createMcpServer(slack: SlackService): McpServer {
   return server;
 }
 
-export function mountMcp(app: Express, slack: SlackService): void {
+export function mountMcp(app: Express, slack: SlackService, apiKey: string): void {
+  const checkAuth = (req: Request, res: Response): boolean => {
+    const provided = req.headers["x-api-key"];
+    if (provided !== apiKey) {
+      res.status(401).json({
+        jsonrpc: "2.0",
+        error: { code: -32000, message: "Unauthorized: invalid or missing API key" },
+        id: null,
+      });
+      return false;
+    }
+    return true;
+  };
+
   app.post("/mcp", async (req: Request, res: Response) => {
+    if (!checkAuth(req, res)) return;
     const sessionId = req.headers["mcp-session-id"] as string | undefined;
 
     try {
@@ -115,6 +129,7 @@ export function mountMcp(app: Express, slack: SlackService): void {
   });
 
   app.get("/mcp", async (req: Request, res: Response) => {
+    if (!checkAuth(req, res)) return;
     const sessionId = req.headers["mcp-session-id"] as string | undefined;
     if (!sessionId || !transports.has(sessionId)) {
       res.status(400).send("Invalid or missing session ID");
@@ -124,6 +139,7 @@ export function mountMcp(app: Express, slack: SlackService): void {
   });
 
   app.delete("/mcp", async (req: Request, res: Response) => {
+    if (!checkAuth(req, res)) return;
     const sessionId = req.headers["mcp-session-id"] as string | undefined;
     if (!sessionId || !transports.has(sessionId)) {
       res.status(400).send("Invalid or missing session ID");

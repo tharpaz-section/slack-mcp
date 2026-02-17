@@ -76,8 +76,8 @@ export function createApp() {
     res.status(result.ok ? 200 : 500).json(result);
   });
 
-  // MCP protocol endpoint (no API key — MCP handles its own auth)
-  mountMcp(app, slack);
+  // MCP protocol endpoint
+  mountMcp(app, slack, apiKey);
 
   return app;
 }
