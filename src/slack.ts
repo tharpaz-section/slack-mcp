@@ -13,8 +13,9 @@ export class SlackService {
   }
 
   async sendMessage(channel: string, text: string): Promise<ApiResponse> {
+    const client = this.userClient || this.client;
     try {
-      const result = await this.client.chat.postMessage({ channel, text });
+      const result = await client.chat.postMessage({ channel, text });
       return { ok: true, ts: result.ts as string, channel: result.channel as string };
     } catch (err: any) {
       return {
