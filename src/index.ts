@@ -11,13 +11,14 @@ export function createApp() {
   app.use(express.json());
 
   const slackToken = process.env.SLACK_BOT_TOKEN;
+  const userToken = process.env.SLACK_USER_TOKEN;
   const apiKey = process.env.API_KEY;
 
   if (!slackToken || !apiKey) {
     throw new Error("SLACK_BOT_TOKEN and API_KEY environment variables are required");
   }
 
-  const slack = new SlackService(slackToken);
+  const slack = new SlackService(slackToken, userToken);
   app.use("/api", requireApiKey(apiKey));
 
   // Health check (no auth)
@@ -53,6 +54,24 @@ export function createApp() {
       return;
     }
     const result = await slack.searchMessages(query, parseInt(count || "20", 10));
+    res.status(result.ok ? 200 : 500).json(result);
+  });
+
+  // Search users by name
+  app.get("/api/users/search", async (req, res) => {
+    const query = req.query.query as string;
+    if (!query) {
+      res.status(400).json({ ok: false, error: "bad_request", detail: "query parameter is required" });
+      return;
+    }
+    const result = await slack.searchUsers(query);
+    res.status(result.ok ? 200 : 500).json(result);
+  });
+
+  // Open/find a DM channel with a user
+  app.get("/api/dm/open/:userId", async (req, res) => {
+    const { userId } = req.params;
+    const result = await slack.openDm(userId);
     res.status(result.ok ? 200 : 500).json(result);
   });
 
