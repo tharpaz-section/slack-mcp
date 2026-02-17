@@ -96,8 +96,9 @@ export class SlackService {
   }
 
   async openDm(userId: string): Promise<ApiResponse> {
+    const client = this.userClient || this.client;
     try {
-      const result = await this.client.conversations.open({ users: userId });
+      const result = await client.conversations.open({ users: userId });
       return {
         ok: true,
         channel: (result.channel as any)?.id,
