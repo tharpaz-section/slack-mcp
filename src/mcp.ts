@@ -75,7 +75,10 @@ function createMcpServer(slack: SlackService): McpServer {
 
 export function mountMcp(app: Express, slack: SlackService, apiKey: string): void {
   const checkAuth = (req: Request, res: Response): boolean => {
-    const provided = req.headers["x-api-key"];
+    const xApiKey = req.headers["x-api-key"];
+    const authHeader = req.headers["authorization"];
+    const bearer = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : undefined;
+    const provided = xApiKey || bearer;
     if (provided !== apiKey) {
       res.status(401).json({
         jsonrpc: "2.0",
